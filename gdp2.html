@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>India GDP Data</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
+
+        .navbar {
+            background: linear-gradient(45deg, #ff5733, #ffbd33);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: white !important;
+        }
+
+        .footer {
+            background: linear-gradient(45deg, #6a11cb, #2575fc);
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ff5733, #ffbd33);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #ffbd33, #ff5733);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="#">GDP Data Portal</a>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <h3 class="text-center text-success">Find GDP of a Country</h3>
+
+        <div class="mb-3">
+            <label for="countrySelect" class="form-label">Select a Country:</label>
+            <select class="form-select" id="countrySelect">
+                <option value="">Loading countries...</option>
+            </select>
+        </div>
+
+        <button id="fetchData" class="btn btn-primary w-100">Fetch GDP Data</button>
+
+        <table class="table table-bordered table-striped mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Year</th>
+                    <th>GDP Growth (%)</th>
+                    <th>GDP Nominal (Billion USD)</th>
+                    <th>GDP Per Capita (USD)</th>
+                </tr>
+            </thead>
+            <tbody id="gdpTableBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>© 2024 GDP Data Portal | Designed by ChatGPT</p>
+    </div>
+
+    <script>
+        // Fetch the list of countries on page load
+        async function fetchCountries() {
+            try {
+                let response = await fetch('https://countriesnow.space/api/v0.1/countries');
+                let data = await response.json();
+                let countries = data.data.map(country => country.country);
+                let countrySelect = document.getElementById("countrySelect");
+                countrySelect.innerHTML = '<option value="">Select a country</option>';
+                countries.forEach(country => {
+                    let option = document.createElement("option");
+                    option.value = country;
+                    option.textContent = country;
+                    countrySelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error fetching countries:", error);
+            }
+        }
+
+        // Fetch GDP Data
+        document.getElementById("fetchData").addEventListener("click", async function () {
+            let selectedCountry = document.getElementById("countrySelect").value;
+            if (!selectedCountry) {
+                alert("Please select a country first.");
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://api.api-ninjas.com/v1/gdp?country=${selectedCountry}`, {
+                    headers: { "X-Api-Key": "E1HoKoSP8ti5eEpRHl4lXg==wmj6A26w96IXIg6p" }
+                });
+
+                if (!response.ok) throw new Error("Failed to fetch data");
+
+                const data = await response.json();
+                const tableBody = document.getElementById("gdpTableBody");
+                tableBody.innerHTML = ""; // Clear previous data
+
+                data.forEach(item => {
+                    const row = `<tr>
+                        <td>${item.year}</td>
+                        <td>${item.gdp_growth}</td>
+                        <td>${item.gdp_nominal}</td>
+                        <td>${item.gdp_per_capita_nominal}</td>
+                    </tr>`;
+                    tableBody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error("Error fetching GDP data:", error);
+            }
+        });
+
+        // Call fetchCountries on page load
+        fetchCountries();
+    </script>
+    <!-- https://api-ninjas.com/profile -->
+</body>
+
+</html>
